@@ -6,6 +6,7 @@ import tranco
 from custom_command import LinkCountingCommand
 from openwpm.command_sequence import CommandSequence
 from openwpm.commands.browser_commands import GetCommand
+from openwpm.commands.browser_commands import BrowseCommand
 from openwpm.config import BrowserParams, ManagerParams
 from openwpm.storage.sql_provider import SQLiteStorageProvider
 from openwpm.task_manager import TaskManager
@@ -18,15 +19,17 @@ if args.tranco:
     # Load the latest tranco list. See https://tranco-list.eu/
     print("Loading tranco top sites list...")
     t = tranco.Tranco(cache=True, cache_dir=".tranco")
-    latest_list = t.list()
+    latest_list = t.list(list_id="N7QVW")
     sites = ["http://" + x for x in latest_list.top(10)]
 else:
-    sites = [
-        "http://www.example.com",
-        "http://www.princeton.edu",
-        "http://citp.princeton.edu/",
-    ]
+    latest_list = open("tranco/sample_OpenWPM_input").readlines()
+    sites = ["http://" + x for x in latest_list[0:1000] ]
 
+#    sites = [
+#        "http://www.texasmonthly.com",
+#    ]
+
+    
 # Loads the default ManagerParams
 # and NUM_BROWSERS copies of the default BrowserParams
 NUM_BROWSERS = 2
@@ -47,6 +50,8 @@ for browser_param in browser_params:
     browser_param.callstack_instrument = False
     # Record DNS resolution
     browser_param.dns_instrument = True
+    # No display
+    display_mode = "headless"
 
 # Update TaskManager configuration (use this for crawl-wide settings)
 manager_params.data_directory = Path("./datadir/")
@@ -82,6 +87,9 @@ with TaskManager(
 
         # Start by visiting the page
         command_sequence.append_command(GetCommand(url=site, sleep=3), timeout=60)
+
+        #command_sequence.append_command(BrowseCommand(url=site, num_links=3, sleep=3), timeout=60)
+
         # Have a look at custom_command.py to see how to implement your own command
         command_sequence.append_command(LinkCountingCommand())
 

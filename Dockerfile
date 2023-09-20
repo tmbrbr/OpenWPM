@@ -32,4 +32,4 @@ RUN mv firefox-bin /opt/firefox-bin
 ENV FIREFOX_BINARY /opt/firefox-bin/firefox-bin
 
 # Setting demo.py as the default command
-CMD [ "python", "demo.py"]
+CMD [ "python", "fingerprint.py"]
